@@ -1,0 +1,87 @@
+[project]
+name = "bmsdna-mailing"
+version = "0.8.0"
+description = ""
+authors = [
+    { name = "Adrian Ehrsam", email = "5270024+aersam@users.noreply.github.com" },
+]
+dependencies = [
+    "aiohttp >=3.9.5,<4",
+    "deltalake2db >=0.8.0",
+    "azure-identity >=1.17.1,<2",
+    "pydantic >=2.8.2,<3",
+    "holidays >=0.52",
+    "azure-storage-blob >=12.20.0,<13",
+    "aiofiles >=24.1.0,<25",
+    "pytz ~=2024.1",
+    "deltalake >=0.18.0,!=0.18.2",
+    "azure-data-tables>=12.6.0",
+]
+requires-python = "~=3.10"
+
+[project.scripts]
+
+[dependency-groups]
+dev = [
+    "pyright >=1.1.359,<2",
+    "ruff>=0.4.1",
+    "polars >= 1.21",
+    "deltalake2db >= 0.8",
+]
+test = [
+    "pytest >=8.1.1,<9",
+    "pytest-asyncio >=0.23.8",
+    "docker >=7.1.0,<8",
+    "python-dotenv >=1.0.1,<2",
+    "pytest-env >=1.1.5,<2",
+]
+
+[project.optional-dependencies]
+polars = [
+    "polars >= 1.19",
+    "deltalake2db >= 0.8",
+]
+
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[tool.uv]
+native-tls = true
+keyring-provider = "subprocess"
+
+[[tool.uv.index]]
+name = "BMSAzureDevOps"
+url = "https://VssSessionToken@pkgs.dev.azure.com/bmeurope/_packaging/BMS/pypi/simple/"
+explicit = true
+publish-url = "https://pkgs.dev.azure.com/bmeurope/_packaging/BMS/pypi/upload/"
+
+[tool.uv.sources.lakeapi2sqlite]
+index = "BMSAzureDevOps"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "bmsdna",
+]
+
+
+
+[tool.pyright]
+venv = ".venv"
+venvPath = "."
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+reportNoOverloadImplementation = "error"
+reportIncompatibleMethodOverride = "error"
+reportIncompatibleVariableOverride = "error"
+
+[tool.ruff]
+line-length = 119
+
+[tool.pytest.ini_options]
+env = [
+    "IS_TEST=1",
+    "MAIL_STORAGE_CONNECTION=UseDevelopmentStorage=true"
+]
