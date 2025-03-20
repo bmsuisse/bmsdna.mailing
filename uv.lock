@@ -198,7 +198,7 @@ wheels = [
 
 [[package]]
 name = "bmsdna-mailing"
-version = "0.8.0"
+version = "0.8.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -240,14 +240,14 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.9.5,<4" },
     { name = "azure-data-tables", specifier = ">=12.6.0" },
     { name = "azure-identity", specifier = ">=1.17.1,<2" },
-    { name = "azure-storage-blob", specifier = ">=12.20.0,<13" },
+    { name = "azure-storage-blob", specifier = ">=12.19.0,<13" },
     { name = "deltalake", specifier = ">=0.18.0,!=0.18.2" },
     { name = "deltalake2db", specifier = ">=0.8.0" },
     { name = "deltalake2db", marker = "extra == 'polars'", specifier = ">=0.8" },
     { name = "holidays", specifier = ">=0.52" },
     { name = "polars", marker = "extra == 'polars'", specifier = ">=1.19" },
-    { name = "pydantic", specifier = ">=2.8.2,<3" },
-    { name = "pytz", specifier = "~=2024.1" },
+    { name = "pydantic", specifier = ">=1.10.0,<3" },
+    { name = "pytz", specifier = ">=2022.7" },
 ]
 
 [package.metadata.requires-dev]

@@ -1,6 +1,6 @@
 [project]
 name = "bmsdna-mailing"
-version = "0.8.0"
+version = "0.8.1"
 description = ""
 authors = [
     { name = "Adrian Ehrsam", email = "5270024+aersam@users.noreply.github.com" },
@@ -9,11 +9,11 @@ dependencies = [
     "aiohttp >=3.9.5,<4",
     "deltalake2db >=0.8.0",
     "azure-identity >=1.17.1,<2",
-    "pydantic >=2.8.2,<3",
+    "pydantic >=1.10.0,<3",
     "holidays >=0.52",
-    "azure-storage-blob >=12.20.0,<13",
+    "azure-storage-blob >=12.19.0,<13",
     "aiofiles >=24.1.0,<25",
-    "pytz ~=2024.1",
+    "pytz >=2022.7",
     "deltalake >=0.18.0,!=0.18.2",
     "azure-data-tables>=12.6.0",
 ]
