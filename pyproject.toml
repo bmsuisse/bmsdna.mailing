@@ -1,6 +1,6 @@
 [project]
 name = "bmsdna-mailing"
-version = "0.8.1"
+version = "0.8.2"
 description = ""
 authors = [
     { name = "Adrian Ehrsam", email = "5270024+aersam@users.noreply.github.com" },
@@ -18,6 +18,8 @@ dependencies = [
     "azure-data-tables>=12.6.0",
 ]
 requires-python = "~=3.10"
+readme="README.md"
+license="MIT"
 
 [project.scripts]
 
