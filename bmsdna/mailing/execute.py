@@ -22,17 +22,17 @@ async def run_jobs(
     results = []
     start = time.time()
     async with _get_container_client() as contc:
-        async with contc.get_blob_client("lock.txt") as bc:
-            if not await bc.exists():
-                await bc.upload_blob("empty")
 
-            async with await bc.acquire_lease(lease_duration=60) as lease:
-                async with GenerationContext() as context:
-                    async for td in get_jobs_todo(dry=False, context=context, filter_system=filter_system, filter_mail=filter_mail):
-                        if filter_system is not None and td.system != filter_system:
-                            continue
-                        if filter_mail is not None and td.mail_name != filter_mail:
-                            continue
+        async with GenerationContext() as context:
+            async for td in get_jobs_todo(dry=False, context=context, filter_system=filter_system, filter_mail=filter_mail):
+                if filter_system is not None and td.system != filter_system:
+                    continue
+                if filter_mail is not None and td.mail_name != filter_mail:
+                    continue
+                async with contc.get_blob_client(f"lock_{td.system}__{td.mail_name}.txt") as bc:
+                    if not await bc.exists():
+                        await bc.upload_blob("empty")
+                    async with await bc.acquire_lease(lease_duration=60) as lease:
                         try:
                             timeout_in_s = (
                                 max_runtime_in_seconds - (time.time() - start)
@@ -77,7 +77,6 @@ async def run_jobs(
                         else:
                             await lease.renew()
                             await context.db.commit_to_storage(with_parquets=False)
-
                     await context.db.commit_to_storage(with_parquets=True)
 
     if len(errors) == 1:
