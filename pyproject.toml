@@ -1,6 +1,6 @@
 [project]
 name = "bmsdna-mailing"
-version = "0.8.3"
+version = "0.8.4"
 description = ""
 authors = [
     { name = "Adrian Ehrsam", email = "5270024+aersam@users.noreply.github.com" },
@@ -20,8 +20,6 @@ dependencies = [
 requires-python = "~=3.10"
 readme="README.md"
 license="MIT"
-
-[project.scripts]
 
 [dependency-groups]
 dev = [

@@ -6,6 +6,7 @@ from typing import Literal, Optional, TypeAlias, TypedDict
 import json
 import aiohttp
 
+is_pydantic_v1 = not hasattr(BaseModel, "model_json_schema")
 
 class ExportError(TypedDict):
     code: str
@@ -114,12 +115,14 @@ class PowerBIPaginatedReportAttachment(FileAttachment):
         headers = {"Authorization": "Bearer " + self._token}
 
         async with aiohttp.ClientSession() as session:
+            config = self.paginatedReportConfiguration.model_dump() if not is_pydantic_v1 else self.paginatedReportConfiguration.dict()
+            
             res = await session.post(
                 f"https://api.powerbi.com/v1.0/myorg/groups/{self.group_id}/reports/{self.report_id}/ExportTo",
                 headers=headers,
                 json={
                     "format": self.format,
-                    "paginatedReportConfiguration": self.paginatedReportConfiguration.model_dump(),
+                    "paginatedReportConfiguration":config,
                 },
             )
             if res.status > 299:
