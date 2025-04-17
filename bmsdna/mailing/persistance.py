@@ -163,9 +163,12 @@ class PersistanceDB:
             return "azure_table"
 
         from bmsdna.mailing.sendgrid import get_is_mail_sent
-
-        if await get_is_mail_sent(session, system_name, periodic_mail_name, entity_id):
-            return "sendgrid"
+        try:
+            if await get_is_mail_sent(session, system_name, periodic_mail_name, entity_id):
+                return "sendgrid"
+        except aiohttp.ClientResponseError:
+            logger.warning("Error while checking mail sent status")
+            return False
         return False
 
     def save_mail_sent(self, run_id: str, system_name: str, periodic_mail_name: str, entity: str, entity_id: str, ok: bool, status: int):
