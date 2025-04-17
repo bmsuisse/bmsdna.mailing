@@ -1,6 +1,6 @@
 [project]
 name = "bmsdna-mailing"
-version = "0.8.4"
+version = "0.8.5"
 description = ""
 authors = [
     { name = "Adrian Ehrsam", email = "5270024+aersam@users.noreply.github.com" },
