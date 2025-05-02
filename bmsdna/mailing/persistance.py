@@ -15,15 +15,18 @@ logger = logging.getLogger(__name__)
 def get_table_service():
     short_azurite_constr = "UseDevelopmentStorage=true"
     azurite_con_str = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
-    
+    def _cred():
+        if cred := os.getenv("USE_DR_SERVICE_CREDENTIAL"):
+            from databricks.sdk.runtime import dbutils
+            return dbutils.credentials.getServiceCredentialsProvider(cred) # type: ignore
     if constr := os.getenv("AZURE_TABLE_CONNECTION_STRING"):
         if constr == short_azurite_constr:
             constr = azurite_con_str
         return TableServiceClient.from_connection_string(constr)
     elif endpoint := os.getenv("AZURE_TABLE_ENDPOINT"):
-        return TableServiceClient(endpoint=endpoint, credential=DefaultAzureCredential())
+        return TableServiceClient(endpoint=endpoint, credential=_cred())
     elif account_name := os.getenv("MAIL_STORAGE_ACCOUNT"):
-        return TableServiceClient(endpoint=f"https://{account_name}.table.core.windows.net", credential=DefaultAzureCredential())
+        return TableServiceClient(endpoint=f"https://{account_name}.table.core.windows.net", credential=_cred())
     elif IS_DEV or IS_TEST:
         return TableServiceClient.from_connection_string(azurite_con_str)
     else:
