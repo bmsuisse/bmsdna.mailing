@@ -42,10 +42,15 @@ class PersistanceDB:
             self.period_mail_log_table.create_table()
         except ResourceExistsError:
             pass
+        except Exception as err:
+            logger.warning("Could not create table. Assuming it exists", exc_info=err)
+            
         try:
             self.mail_sent_log_table.create_table()
         except ResourceExistsError:
             pass
+        except Exception as err:
+            logger.warning("Could not create table. Assuming it exists", exc_info=err)
 
     def commit(self):
         pass
