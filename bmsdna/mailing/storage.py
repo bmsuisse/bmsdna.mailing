@@ -14,10 +14,11 @@ container_name = "mail"
 
 def _get_container_client():
     from azure.storage.blob.aio import ContainerClient
+    from bmsdna.mailing.config import get_async_default_credential
 
     account_name = os.getenv("MAIL_STORAGE_ACCOUNT")
     if account_name:
-        return ContainerClient(account_name + ".blob.core.windows.net", container_name)
+        return ContainerClient(account_name + ".blob.core.windows.net", container_name, credential=get_async_default_credential())
     constr = os.getenv("MAIL_STORAGE_CONNECTION", os.getenv("AzureWebJobsStorage"))
     if constr == "UseDevelopmentStorage=true":
         constr = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
@@ -33,9 +34,11 @@ def _get_container_client():
 
 def _get_container_client_sync():
     from azure.storage.blob import ContainerClient as ContainerClientSync
+    from bmsdna.mailing.config import get_default_credential
+
 
     if account_name := os.getenv("MAIL_STORAGE_ACCOUNT"):
-        return ContainerClientSync(account_name + ".blob.core.windows.net", container_name)
+        return ContainerClientSync(account_name + ".blob.core.windows.net", container_name, credential=get_default_credential())
     constr = os.getenv("MAIL_STORAGE_CONNECTION", os.getenv("AzureWebJobsStorage"))
     if constr == "UseDevelopmentStorage=true":
         constr = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
