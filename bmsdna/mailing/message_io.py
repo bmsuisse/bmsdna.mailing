@@ -140,7 +140,7 @@ def _split_mails(mails: str) -> list[str]:
 async def mail_to_jsondict_sendgrid(m: MailMessage):
     # see https://www.twilio.com/docs/sendgrid/api-reference/mail-send/mail-send
     tos = _split_mails(m.to) if isinstance(m.to, str) else m.to
-    tos = [t for t in tos if t and "@" in t] if tos else []
+    tos = [t.strip() for t in tos if t and "@" in t and t.strip()] if tos else []
     if len(tos) == 0 and (m.cc is not None or m.bcc is not None):
         assert DEFAULT_SENDER is not None, "No sender found, configure DEFAULT_SENDER"
         tos = [DEFAULT_SENDER]  # azure does require a To Recipient
@@ -165,11 +165,11 @@ async def mail_to_jsondict_sendgrid(m: MailMessage):
     d["custom_args"] = {"system": m.system, "entity": m.entity, "entity_id": m.entity_id}
     if m.cc is not None:
         ccs = _split_mails(m.cc) if isinstance(m.cc, str) else m.cc
-        d["personalizations"][0]["cc"] = [{"email": item.strip()} for item in ccs if item.strip()]
+        d["personalizations"][0]["cc"] = [{"email": item.strip()} for item in ccs if item.strip() if item.strip() not in tos]
         has_additional_recipients = len(d["personalizations"][0]["cc"]) > 0
     if m.bcc is not None:
         bccs = _split_mails(m.bcc) if isinstance(m.bcc, str) else m.bcc
-        d["personalizations"][0]["bcc"] = [{"email": item.strip()} for item in bccs if item.strip()]
+        d["personalizations"][0]["bcc"] = [{"email": item.strip()} for item in bccs if item.strip() if item.strip() not in tos]
         has_additional_recipients = has_additional_recipients or len(d["personalizations"][0]["bcc"]) > 0
 
     if len(d["personalizations"][0]["to"]) == 0 and has_additional_recipients:
