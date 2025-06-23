@@ -165,11 +165,11 @@ async def mail_to_jsondict_sendgrid(m: MailMessage):
     d["custom_args"] = {"system": m.system, "entity": m.entity, "entity_id": m.entity_id}
     if m.cc is not None:
         ccs = _split_mails(m.cc) if isinstance(m.cc, str) else m.cc
-        d["personalizations"][0]["cc"] = [{"email": item.strip()} for item in ccs if item.strip() if item.strip() not in tos]
+        d["personalizations"][0]["cc"] = [{"email": item.strip()} for item in ccs if item.strip() and item.strip() not in tos]
         has_additional_recipients = len(d["personalizations"][0]["cc"]) > 0
     if m.bcc is not None:
         bccs = _split_mails(m.bcc) if isinstance(m.bcc, str) else m.bcc
-        d["personalizations"][0]["bcc"] = [{"email": item.strip()} for item in bccs if item.strip() if item.strip() not in tos]
+        d["personalizations"][0]["bcc"] = [{"email": item.strip()} for item in bccs if item.strip() and item.strip() not in tos]
         has_additional_recipients = has_additional_recipients or len(d["personalizations"][0]["bcc"]) > 0
 
     if len(d["personalizations"][0]["to"]) == 0 and has_additional_recipients:
