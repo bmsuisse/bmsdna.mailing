@@ -74,6 +74,8 @@ async def get_last_sent_date(
                 rsp_msg = await http_session.get(
                     f"https://api.sendgrid.com/v3/messages/{msg['msg_id']}", headers=headers
                 )
+                if rsp_msg.status == 404: # no longer there, a bit strange, but ok
+                    continue
                 if rsp_msg.status == 429:
                     await asyncio.sleep(20)
                     rsp_msg = await http_session.get(
@@ -84,6 +86,8 @@ async def get_last_sent_date(
                         rsp_msg = await http_session.get(
                             f"https://api.sendgrid.com/v3/messages/{msg['msg_id']}", headers=headers
                         )
+                        if rsp_msg.status == 404:
+                            continue    
                         if rsp_msg.status == 429:
                             return max_date
 
