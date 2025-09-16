@@ -90,7 +90,10 @@ async def get_last_sent_date(
                             continue    
                         if rsp_msg.status == 429:
                             return max_date
-
+            if rsp_msg.status == 404: # no longer there, a bit strange, but ok
+                continue
+            if rsp_msg.status == 429:
+                return max_date
             rsp_msg.raise_for_status()
             msg_js = await rsp_msg.json()
             process_date = next((x for x in msg_js["events"] if x["event_name"] == "processed"))["processed"]
