@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from bmsdna.mailing.registry import (
     HOLIDAYS,
@@ -121,3 +121,77 @@ def test_sox_mail():
     assert s.is_due(datetime(2026, 2, 18, 7, 1, tzinfo=TZONE), now=datetime(2026, 2, 26, 7, 1, tzinfo=TZONE))
     assert s.is_due(datetime(2026, 2, 18, 7, 1, tzinfo=TZONE), now=datetime(2026, 2, 27, 7, 1, tzinfo=TZONE))
     assert s.is_due(datetime(2026, 2, 18, 7, 1, tzinfo=TZONE), now=datetime(2026, 2, 28, 7, 1, tzinfo=TZONE))
+
+
+def test_sox_mail_weekends_and_holidays():
+    # January 2026: 11th, 18th, 25th all fall on Sunday → each forwards to the following Monday
+    @sox_schedule_mail(
+        "compliance",
+        "sox_mail_jan_we",
+        day_time=time(6, 0, tzinfo=TZONE),
+        start_date=datetime(2026, 1, 5, 6, 0, tzinfo=TZONE),  # Monday Jan 5
+        retry_on_empty_send=False,
+    )
+    def _jan(info: GenerationInfo) -> None:
+        pass
+
+    s = _registry[("compliance", "sox_mail_jan_we")].schedule
+    assert s is not None
+
+    # Jan 11 = Sunday → not due; due on Mon Jan 12
+    assert not s.is_due(datetime(2026, 1, 5, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 11, 7, 1, tzinfo=TZONE))
+    assert s.is_due(datetime(2026, 1, 5, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 12, 7, 1, tzinfo=TZONE))
+    # Jan 18 = Sunday → not due; due on Mon Jan 19
+    assert not s.is_due(datetime(2026, 1, 12, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 18, 7, 1, tzinfo=TZONE))
+    assert s.is_due(datetime(2026, 1, 12, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 19, 7, 1, tzinfo=TZONE))
+    # Jan 25 = Sunday → not due; due on Mon Jan 26
+    assert not s.is_due(datetime(2026, 1, 19, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 25, 7, 1, tzinfo=TZONE))
+    assert s.is_due(datetime(2026, 1, 19, 7, 1, tzinfo=TZONE), now=datetime(2026, 1, 26, 7, 1, tzinfo=TZONE))
+
+    # April 2026: 11th, 18th, 25th all fall on Saturday → each forwards past Sat+Sun to Monday
+    @sox_schedule_mail(
+        "compliance",
+        "sox_mail_apr_we",
+        day_time=time(6, 0, tzinfo=TZONE),
+        start_date=datetime(2026, 4, 1, 6, 0, tzinfo=TZONE),  # Wednesday Apr 1
+        retry_on_empty_send=False,
+    )
+    def _apr(info: GenerationInfo) -> None:
+        pass
+
+    s = _registry[("compliance", "sox_mail_apr_we")].schedule
+    assert s is not None
+
+    # Apr 11 = Sat, Apr 12 = Sun → not due either day; due Mon Apr 13
+    assert not s.is_due(datetime(2026, 4, 1, 7, 1, tzinfo=TZONE), now=datetime(2026, 4, 11, 7, 1, tzinfo=TZONE))
+    assert not s.is_due(datetime(2026, 4, 1, 7, 1, tzinfo=TZONE), now=datetime(2026, 4, 12, 7, 1, tzinfo=TZONE))
+    assert s.is_due(datetime(2026, 4, 1, 7, 1, tzinfo=TZONE), now=datetime(2026, 4, 13, 7, 1, tzinfo=TZONE))
+    # Apr 18 = Sat → not due; due Mon Apr 20
+    assert not s.is_due(datetime(2026, 4, 13, 7, 1, tzinfo=TZONE), now=datetime(2026, 4, 18, 7, 1, tzinfo=TZONE))
+    assert s.is_due(datetime(2026, 4, 13, 7, 1, tzinfo=TZONE), now=datetime(2026, 4, 20, 7, 1, tzinfo=TZONE))
+
+    # December 2026: Dec 25 = Christmas (Friday, CH public holiday).
+    # The registry also registers Dec 26–31 as extra project holidays.
+    # We walk forward dynamically so the assertion is correct regardless of which holidays
+    # are loaded (depends on the year the module was imported).
+    @sox_schedule_mail(
+        "compliance",
+        "sox_mail_dec_hol",
+        day_time=time(6, 0, tzinfo=TZONE),
+        start_date=datetime(2026, 12, 4, 6, 0, tzinfo=TZONE),  # Friday Dec 4
+        retry_on_empty_send=False,
+    )
+    def _dec(info: GenerationInfo) -> None:
+        pass
+
+    s = _registry[("compliance", "sox_mail_dec_hol")].schedule
+    assert s is not None
+
+    last = datetime(2026, 12, 18, 7, 1, tzinfo=TZONE)
+    assert not s.is_due(last, now=datetime(2026, 12, 25, 7, 1, tzinfo=TZONE))  # Christmas itself
+
+    # Find the first weekday after Christmas that is not a holiday
+    first_allowed = date(2026, 12, 26)
+    while first_allowed.weekday() >= 5 or first_allowed in HOLIDAYS:
+        first_allowed += timedelta(days=1)
+    assert s.is_due(last, now=datetime(first_allowed.year, first_allowed.month, first_allowed.day, 7, 1, tzinfo=TZONE))
