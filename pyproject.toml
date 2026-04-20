@@ -31,6 +31,7 @@ test = [
     "docker >=7.1.0,<8",
     "python-dotenv >=1.0.1,<2",
     "pytest-env >=1.1.5,<2",
+    "pytest-timeout>=2.4.0",
 ]
 databricks = [
     "databricks-sdk>=0.51.0",
