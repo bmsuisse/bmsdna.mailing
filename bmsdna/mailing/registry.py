@@ -47,7 +47,7 @@ class GenerationInfo:
     system: str
     mail_name: str
     dry_run: bool
-    context: GenerationContext
+    context: GenerationContext | None
 
     def make_mail(
         self,
@@ -380,10 +380,10 @@ async def _send_mails(
 
 
 async def get_mails_dry(
-    context: GenerationContext, system: str, mail_name: str, *, filter: Callable[[MailMessage], bool] | None = None
+    system: str, mail_name: str, *, filter: Callable[[MailMessage], bool] | None = None
 ):
     mail = _registry[(system, mail_name)]
-    res = mail.func(GenerationInfo(system, mail_name, dry_run=True, context=context))
+    res = mail.func(GenerationInfo(system, mail_name, dry_run=True, context=None))
     real_res = _mail_messages(res)
     async for m in real_res:
         if filter is None or filter(m):
