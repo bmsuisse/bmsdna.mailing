@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -34,7 +35,7 @@ class TokenAdapter(AsyncTokenCredential):
         :rtype: AccessToken
         :return: An AccessToken instance containing the token string and its expiration time in Unix time.
         """
-        return self.sync_cred.get_token(*args, **kwargs)
+        return await asyncio.to_thread(self.sync_cred.get_token, *args, **kwargs)
 
     async def close(self) -> None:
         pass
