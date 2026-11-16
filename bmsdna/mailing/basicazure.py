@@ -27,6 +27,13 @@ async def acquire_token(*, prefix="MAILER", scopes: Union[tuple[str], str, None]
         scopes = (scopes,)
     assert scopes is not None
 
+    from .config import get_credential_override
+
+    if (override := get_credential_override()) is not None:
+        assert override.async_ is not None
+        tk = await override.async_.get_token(*scopes)
+        return (tk.token, datetime.fromtimestamp(tk.expires_on, tz=timezone.utc))
+
     if not client_id:
         if os.getenv("IS_DEV", "0") == "1":
             scred = InteractiveBrowserCredential()

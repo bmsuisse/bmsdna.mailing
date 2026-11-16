@@ -48,3 +48,21 @@ async def generate_mail(info: GenerationInfo) -> List[MailMessage]:
 
 ```
 
+
+## Using your own identity
+
+By default, Azure Storage and Graph / Power BI are accessed using `DefaultAzureCredential` (or the Databricks service credential if `USE_DR_SERVICE_CREDENTIAL` is set). To use a different identity, e.g. one of your own caller, override it:
+
+```python
+from azure.identity import ClientSecretCredential
+from bmsdna.mailing.config import set_default_credential, use_credential
+
+# process-wide
+set_default_credential(ClientSecretCredential(tenant_id, client_id, client_secret))
+
+# or only inside a block (per thread / asyncio task), takes precedence over the process-wide one
+with use_credential(my_credential):
+    await run_jobs()
+```
+
+A sync `TokenCredential` is used for sync and (wrapped) async clients. You may additionally pass `async_credential=` for a native async one. You own the credential's lifecycle. Call `set_default_credential()` without arguments to reset.
